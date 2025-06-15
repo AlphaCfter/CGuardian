@@ -3,6 +3,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Support/raw_ostream.h"
+#include "PassRegistration.h"
 
 using namespace llvm;
 
@@ -29,23 +30,13 @@ struct ScanfCheckerPass : PassInfoMixin<ScanfCheckerPass> {
     }
 };
 
-extern "C" PassPluginLibraryInfo llvmGetPassPluginInfo() {
-    return {
-        LLVM_PLUGIN_API_VERSION,
-        "ScanfChecker",
-        "v1.0",
-        [](PassBuilder &PB) {
-            errs() << "ScanfChecker plugin loaded\n";
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                    if (Name == "scanf-checker") {
-                        errs() << "Registering scanf-checker pass in pipeline\n";
-                        FPM.addPass(ScanfCheckerPass());
-                        return true;
-                    }
-                    return false;
-                });
-        }
-    };
+void registerMyPasses(PassBuilder &PB) {
+    PB.registerPipelineParsingCallback(
+        [](StringRef Name, FunctionPassManager &FPM,
+           ArrayRef<PassBuilder::PipelineElement>) {
+            REGISTER_FUNCTION_PASS("scanf-checker", ScanfCheckerPass);
+            return false;
+        });
 }
+
+DEFINE_PLUGIN("ScanfChecker", "v1.0", registerMyPasses)
