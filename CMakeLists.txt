@@ -3,7 +3,8 @@ project(ScanfChecker LANGUAGES CXX)
 
 find_package(LLVM REQUIRED CONFIG)
 
-add_library(ScanfChecker MODULE main.cpp)
+add_library(ScanfChecker MODULE main.cpp
+        PassRegistration.h)
 
 target_include_directories(ScanfChecker PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(ScanfChecker PRIVATE ${LLVM_DEFINITIONS})
